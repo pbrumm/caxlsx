@@ -25,7 +25,8 @@ module Axlsx
       @data = []
       @pages = []
       @subtotal = nil
-      @show_grand_total = true
+      @show_col_grand_total = true
+      @show_row_grand_total = true
       @no_subtotals_on_headers = []
       @sort_on_headers = {}
       @style_info = {}
@@ -51,7 +52,8 @@ module Axlsx
       headers = Hash[*headers.map { |h| [h, :ascending] }.flatten] if headers.is_a?(Array)
       @sort_on_headers = headers
     end
-    attr_writer :show_grand_total
+    attr_writer :show_col_grand_total, :show_row_grand_total
+
     # Style info for the pivot table
     # @return [Hash]
     attr_accessor :style_info
@@ -188,8 +190,9 @@ module Axlsx
     # @return [String]
     def to_xml_string(str = +'')
       str << '<?xml version="1.0" encoding="UTF-8"?>'
-      show_grand_total = @show_grand_total ? "1" : "0"
-      str << '<pivotTableDefinition xmlns="' << XML_NS << '" name="' << name << '" cacheId="' << cache_definition.cache_id.to_s << '"' << (data.size <= 1 ? ' dataOnRows="1"' : '') << %{ applyNumberFormats="0" applyBorderFormats="0" applyFontFormats="0" applyPatternFormats="0" applyAlignmentFormats="0" applyWidthHeightFormats="1" dataCaption="Data" showMultipleLabel="0" showMemberPropertyTips="0" useAutoFormatting="1" indent="0" compact="0" compactData="0" gridDropZones="1" multipleFieldFilters="0" rowGrandTotals="#{show_grand_total}">}
+      show_row_grand_total = @show_row_grand_total ? "1" : "0"
+      show_col_grand_total = @show_col_grand_total ? "1" : "0"
+      str << '<pivotTableDefinition xmlns="' << XML_NS << '" name="' << name << '" cacheId="' << cache_definition.cache_id.to_s << '"' << (data.size <= 1 ? ' dataOnRows="1"' : '') << %{ applyNumberFormats="0" applyBorderFormats="0" applyFontFormats="0" applyPatternFormats="0" applyAlignmentFormats="0" applyWidthHeightFormats="1" dataCaption="Data" showMultipleLabel="0" showMemberPropertyTips="0" useAutoFormatting="1" indent="0" compact="0" compactData="0" gridDropZones="1" multipleFieldFilters="0" rowGrandTotals="#{show_row_grand_total}" colGrandTotals="#{show_col_grand_total}">}
 
       str << '<location firstDataCol="1" firstDataRow="1" firstHeaderRow="1" ref="' << ref << '"/>'
       str << '<pivotFields count="' << header_cells_count.to_s << '">'
