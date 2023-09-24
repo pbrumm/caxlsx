@@ -51,13 +51,24 @@ module Axlsx
       str << '<cacheSource type="worksheet">'
       str << '<worksheetSource ref="' << pivot_table.range << '" sheet="' << pivot_table.data_sheet.name << '"/>'
       str << '</cacheSource>'
-      str << '<cacheFields count="' << pivot_table.header_cells_count.to_s << '">'
+      str << '<cacheFields count="' << pivot_table.header_and_filter_cells_count.to_s << '">'
       pivot_table.header_cells.each do |cell|
         str << '<cacheField name="' << cell.clean_value << '" numFmtId="0">'
-        str <<     '<sharedItems count="0">'
-        str <<     '</sharedItems>'
+        if pivot_table.filter_all_values && pivot_table.filter_all_values.has_key?(cell.clean_value)
+          values = pivot_table.filter_all_values[cell.clean_value]
+          str <<     %{<sharedItems count="#{values.size}">}
+           
+          values.each do |value|
+            str <<      %{<n v="#{value.to_s}" />}
+          end
+          str <<     '</sharedItems>'
+        else
+          str <<     '<sharedItems count="0">'
+          str <<     '</sharedItems>'
+        end
         str << '</cacheField>'
       end
+      
       str << '</cacheFields>'
       str << '</pivotCacheDefinition>'
     end

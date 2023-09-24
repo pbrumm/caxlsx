@@ -140,6 +140,15 @@ module Axlsx
       end
     end
 
+    def filters(all_values, selected_values)
+      @filter_all_values = all_values
+      @filter_selected_values = selected_values
+    end
+    attr_reader :filter_all_values, :filter_selected_values
+
+    def header_and_filter_cells_count
+      @rows.size + @columns.size + (@filter_columns || 0).size
+    end
     # The pages
     # @return [String]
     attr_reader :pages
@@ -238,6 +247,7 @@ module Axlsx
         end
         str << '</colFields>'
       end
+      
       unless pages.empty?
         str << '<pageFields count="' << pages.size.to_s << '">'
         pages.each do |page_value|
@@ -301,7 +311,20 @@ module Axlsx
 
     def pivot_field_for(cell_ref, subtotal, sorttype)
       attributes = %w[compact="0" outline="0" subtotalTop="0" showAll="0" includeNewItemsInFilter="1"]
-      items_tag = '<items count="1"><item t="default"/></items>'
+      item_selected_fields = @filter_selected_values[cell_ref]
+      if item_selected_fields
+        item_all_fields = @filter_all_values[cell_ref]
+        item_attr = [%{<items count="#{item_all_fields.size}">}]
+        item_all_fields.each_with_index {|item_all_value, item_all_index|
+          item_attr << %{<item x="#{item_all_index}" #{item_selected_fields.include?(item_all_value) ? "" : 'h="1"'} />}
+
+
+        }
+        item_attr << "</items>"
+        items_tag = item_attr.join("\n")
+      else
+        items_tag = '<items count="1"><item t="default"/></items>'
+      end
       include_items_tag = false
 
       if rows.include? cell_ref
@@ -315,12 +338,21 @@ module Axlsx
       elsif columns.include? cell_ref
         attributes << 'axis="axisCol"'
         attributes << "sortType=\"#{sorttype == :descending ? 'descending' : 'ascending'}\"" if sorttype
-        include_items_tag = true
+        if subtotal
+          include_items_tag = true
+        else
+          attributes << 'defaultSubtotal="0"'
+        end
       elsif pages.include? cell_ref
         attributes << 'axis="axisPage"'
         include_items_tag = true
       elsif data_refs.include? cell_ref
         attributes << 'dataField="1"'
+        if subtotal
+          include_items_tag = true
+        else
+          attributes << 'defaultSubtotal="0"'
+        end
       end
 
       "<pivotField #{attributes.join(' ')}>#{include_items_tag ? items_tag : nil}</pivotField>"
