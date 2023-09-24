@@ -59,7 +59,7 @@ module Axlsx
           str <<     %{<sharedItems count="#{values.size}">}
            
           values.each do |value|
-            str <<      %{<n v="#{value.to_s}" />}
+            str <<      %{<s v="#{value.to_s}" />}
           end
           str <<     '</sharedItems>'
         else
