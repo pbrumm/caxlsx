@@ -316,10 +316,11 @@ module Axlsx
         item_all_fields = @filter_all_values[cell_ref]
         item_attr = [%{<items count="#{item_all_fields.size}">}]
         item_all_fields.each_with_index {|item_all_value, item_all_index|
-          item_attr << %{<item x="#{item_all_index}" #{item_selected_fields.include?(item_all_value) ? "" : 'h="1"'} />}
+          item_attr << %{<item #{item_selected_fields.include?(item_all_value) ? "" : 'h="1"'} x="#{item_all_index}" />}
 
 
         }
+        item_attr << %{<item t="default" />}
         item_attr << "</items>"
         items_tag = item_attr.join("\n")
       else
