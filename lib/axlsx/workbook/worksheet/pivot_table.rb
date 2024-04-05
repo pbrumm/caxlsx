@@ -230,7 +230,12 @@ module Axlsx
       end
       if columns.empty?
         if data.size > 1
-          str << '<colFields count="1"><field x="-2"/></colFields>'
+          str << %{<colFields count="#{data.size}">}
+            0.upto(data.size - 2).each {|d_index|
+              str << %{<field x="#{rows.size + d_index}"/>}
+            }
+            str << %{<field x="-2"/>}
+          str << %{</colFields>}
           str << "<colItems count=\"#{data.size}\">"
           str << '<i><x/></i>'
           data[1..-1].each_with_index do |datum_value, i|
@@ -241,11 +246,26 @@ module Axlsx
           str << '<colItems count="1"><i/></colItems>'
         end
       else
-        str << '<colFields count="' << columns.size.to_s << '">'
-        columns.each do |column_value|
-          str << '<field x="' << header_index_of(column_value).to_s << '"/>'
+        if data.size > 1
+          str << %{<colFields count="#{data.size}">}
+            0.upto(data.size - 2).each {|d_index|
+              str << %{<field x="#{rows.size + d_index}"/>}
+            }
+            str << %{<field x="-2"/>}
+          str << %{</colFields>}
+          str << "<colItems count=\"#{data.size}\">"
+          str << '<i><x/></i>'
+          data[1..-1].each_with_index do |datum_value, i|
+            str << "<i i=\"#{i + 1}\"><x v=\"#{i + 1}\"/></i>"
+          end
+          str << '</colItems>'
+        else
+          str << '<colFields count="' << columns.size.to_s << '">'
+          columns.each do |column_value|
+            str << '<field x="' << header_index_of(column_value).to_s << '"/>'
+          end
+          str << '</colFields>'
         end
-        str << '</colFields>'
       end
       
       unless pages.empty?
