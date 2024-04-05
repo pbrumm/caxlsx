@@ -230,10 +230,10 @@ module Axlsx
       end
       if columns.empty?
         if data.size > 1
-          str << %{<colFields count="#{data.size}">}
-            0.upto(data.size - 2).each {|d_index|
-              str << %{<field x="#{rows.size + d_index}"/>}
-            }
+          str << %{<colFields count="#{ columns.size + data.size - 1}">}
+            columns.each do |column_value|
+              str << '<field x="' << header_index_of(column_value).to_s << '"/>'
+            end
             str << %{<field x="-2"/>}
           str << %{</colFields>}
           str << "<colItems count=\"#{data.size}\">"
@@ -247,10 +247,10 @@ module Axlsx
         end
       else
         if data.size > 1
-          str << %{<colFields count="#{data.size}">}
-            0.upto(data.size - 2).each {|d_index|
-              str << %{<field x="#{rows.size + d_index}"/>}
-            }
+          str << %{<colFields count="#{ columns.size + data.size - 1}">}
+            columns.each do |column_value|
+              str << '<field x="' << header_index_of(column_value).to_s << '"/>'
+            end
             str << %{<field x="-2"/>}
           str << %{</colFields>}
           str << "<colItems count=\"#{data.size}\">"
