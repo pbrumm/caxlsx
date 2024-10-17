@@ -55,10 +55,13 @@ module Axlsx
       pivot_table.header_cells.each do |cell|
         str << '<cacheField name="' << cell.clean_value << '" numFmtId="0">'
         if pivot_table.filter_all_values && pivot_table.filter_all_values.has_key?(cell.clean_value)
-          values = pivot_table.filter_all_values[cell.clean_value]
-          str <<     %{<sharedItems count="#{values.size}">}
-           
+          values = pivot_table.filter_all_values[cell.clean_value].sort
+          includes_empty = values.include?("")
+          str <<     %{<sharedItems count="#{values.size}"> #{includes_empty ? 'containsBlank="1"' : ''}}
+          
+          str <<      %{<m/>} if includes_empty
           values.each do |value|
+            next if value == ""
             str <<      %{<s v="#{value.to_s}" />}
           end
           str <<     '</sharedItems>'
