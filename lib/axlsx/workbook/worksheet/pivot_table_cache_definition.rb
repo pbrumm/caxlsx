@@ -55,7 +55,7 @@ module Axlsx
       pivot_table.header_cells.each do |cell|
         str << '<cacheField name="' << cell.clean_value << '" numFmtId="0">'
         if pivot_table.filter_all_values && pivot_table.filter_all_values.has_key?(cell.clean_value)
-          values = pivot_table.filter_all_values[cell.clean_value].sort
+          values = pivot_table.filter_all_values[cell.clean_value].sort.map {|s| s.encode(xml: :attr)[1..-2] }
           includes_empty = values.include?("")
           str <<     %{<sharedItems count="#{values.size}"> #{includes_empty ? 'containsBlank="1"' : ''}}
           
